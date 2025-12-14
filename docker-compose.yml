@@ -1,0 +1,30 @@
+services:
+  nextcloud-aio-mastercontainer:
+    image: ghcr.io/nextcloud-releases/all-in-one:latest
+    init: true
+    restart: unless-stopped
+    container_name: nextcloud-aio-mastercontainer
+    volumes:
+      # DO NOT CHANGE: Required for AIO's built-in backup solution
+      - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
+      # DO NOT CHANGE: Required for AIO to manage other containers
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    network_mode: bridge
+    ports:
+      # Port 8080 for the secure AIO Web Interface
+      - 8080:8080
+    environment:
+      # Internal Apache port for reverse proxy
+      APACHE_PORT: 11000
+      APACHE_IP_BINDING: "0.0.0.0"
+      # ZFS-backed data directory
+      NEXTCLOUD_DATADIR: /mnt/ncdata
+      NEXTCLOUD_MOUNT: /mnt/
+      # Upload limit
+      NEXTCLOUD_UPLOAD_LIMIT: 300G
+      # Requires reverse proxy to be ready, else true if you do not have a reverse proxy
+      SKIP_DOMAIN_VALIDATION: false
+
+volumes:
+  nextcloud_aio_mastercontainer:
+    name: nextcloud_aio_mastercontainer
